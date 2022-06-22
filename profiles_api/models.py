@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
+from django.conf import settings
 
 
 class UserProfileManager(BaseUserManager):
@@ -53,3 +54,21 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     # isse email display hogi at admin page
     def __str__(self):
         return self.email
+    
+class ProfileFeedItem(models.Model):
+    # this model will allow users to store status updates in system
+    # whenever a new update is made, it will make a new profile feed item and associate it with user that created it
+    # we will use foreign key to associate model with model
+    # integrity is maintained, never create a profile feed item for user that doesn't exist
+    user_profile =models.ForeignKey(
+        # we want to link it with userprofile model but we will link it through settings.py because we're passing it
+        # here in a variable.. so if we change model in settings.py we don't need to manually update it here
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    status_text =models.CharField(max_length=255)
+    created_on=models.DateTimeField(auto_now_add=True)
+    # every time we create a new feed item, automatically add date time to item
+    def __str__(self):
+        # return model as string
+        return self.status_text
